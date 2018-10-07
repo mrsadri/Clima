@@ -11,8 +11,8 @@ import SwiftyJSON
 
 class WeatherViewController: UIViewController, CLLocationManagerDelegate, ChangeCityDelegate {
 
-    
-    
+    var timer:Timer?
+    var iSeconds:Float = 100
     //Constants
     let WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
     let APP_ID = /*"e377011e7a638e05c2d4605da24b1471"*/  /*"b2ce1f9835865cc14eb5baa1e577743a"*/  "e72ca729af228beabd5d20e3b7749713"
@@ -24,11 +24,13 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
 
     
     //Linked IBOutlets
+    @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var weatherIcon: UIImageView!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
 
-    
+
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.locationManager.delegate = self
@@ -37,9 +39,32 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
         locationManager.startUpdatingLocation()
         
         //TODO:Set up the location manager:
+        //timer Object
+    }
     
-        
-        
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        timer = Timer.scheduledTimer(timeInterval:  0.5, target: self, selector: #selector(timerElapsed), userInfo: nil, repeats: true)
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(true)
+        timer?.invalidate()
+    }
+    @objc func timerElapsed () {
+        iSeconds -= 1
+        let timeInMasihWorld = weatherDataModel.timeInMasihWorld
+        let timeAsString = String (format: "%.2d", timeInMasihWorld.hour) + " : " + String (format: "%.2d", timeInMasihWorld.minute) + " : " + String (format: "%.2d", timeInMasihWorld.second)
+        self.timeLabel.text = timeAsString
+
+        //timerLabel.text = "Time Remaining: \(seconds)"
+        //When the timer has reached the 0...
+//        if iSeconds <= 0 {
+//            timer?.invalidate()
+//            //timerLabel.textColor = UIColor.red
+//            //timerLabel.font = UIFont.boldSystemFont(ofSize: 17)
+//            //TODO: change the text of label to win/loos state based on checking is remained any unmatched card or not.
+//            //TODO: Show the score
+//        }
     }
     
 
@@ -50,7 +75,6 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
         
         Alamofire.request(url, method: .get, parameters: parameters).responseJSON { response in
             if response.result.isSuccess {
-                print("Hoorey")
                 self.weatherJSON = JSON(response.result.value!)
                 print(self.weatherJSON)
                 self.updateWeather(json: self.weatherJSON)
@@ -70,7 +94,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
         
         weatherDataModel.sunriseTimeInterval = json["sys"]  ["sunrise"].intValue
         weatherDataModel.sunsetTimeInterval  = json["sys"]  ["sunset" ].intValue
-        
+
         weatherDataModel.tempratureDM        = json["main"] ["temp"].doubleValue - 273.15
         weatherDataModel.cityDM              = json["name"].stringValue
         weatherDataModel.conditionDM         = json["weather"][0]["id"].intValue
@@ -85,7 +109,6 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
         func updateUIWithWeatherData(){
         cityLabel.text        =               weatherDataModel.cityDM
         temperatureLabel.text =        "\(Int(weatherDataModel.tempratureDM)) ℃" // "°"
-        print(String(weatherDataModel.tempratureDM))
         weatherIcon.image     = UIImage(named:weatherDataModel.weathrIconName)
     }
     
@@ -104,9 +127,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
         if location.horizontalAccuracy > 0 {
             locationManager.stopUpdatingLocation()
             locationParameters = ["lat": "\((location.coordinate.latitude))", "lon": "\(location.coordinate.longitude)",  "appid" : self.APP_ID ]
-            print(locationParameters)
             //api = "https://api.openweathermap.org/data/2.5/weather?lat=\(locationParameters["lat"]!)&lon=\(locationParameters["lon"]!)&appid=\(locationParameters["appid"]!)"
-            print(api)
             getApiData(url: WEATHER_URL, parameters: locationParameters)
         }
     }
