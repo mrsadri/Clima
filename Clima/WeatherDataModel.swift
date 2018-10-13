@@ -10,9 +10,9 @@ class WeatherDataModel {
     
     //Moodel variables
     var tempratureDM        : Double    = 0
-    var conditionDM         : Int       = 0
+    //var conditionDM         : Int       = 0
     var cityDM              : String    = ""
-    var weathrIconName      : String    = ""
+    //var weathrIconName      : String    = ""
     var sunriseTimeInterval : Int       = 0
     var sunsetTimeInterval  : Int       = 0
     
@@ -49,18 +49,21 @@ class WeatherDataModel {
                 returner.hour += distanceFromSunrise.hour
                 returner.minute += distanceFromSunrise.minute
                 returner.second += distanceFromSunrise.second
+                print(1)
             } else if (Int(date.timeIntervalSince1970) > sunsetTimeInterval){
                 let distanceFromSunset = secondsToDuration(totalSeconds: Int((date.timeIntervalSince1970 - Double(sunsetTimeInterval)) * extendRate))
                 returner = (18,0,0)
-                returner.hour += (distanceFromSunset.hour > 6 ? distanceFromSunset.hour-24 : distanceFromSunset.hour)
+                returner.hour += (distanceFromSunset.hour > 5 ? distanceFromSunset.hour-24 : distanceFromSunset.hour)
                 returner.minute += distanceFromSunset.minute
                 returner.second += distanceFromSunset.second
+                print(2)
             } else if (Int(date.timeIntervalSince1970) < sunriseTimeInterval){
                 let distanceToSunrise = secondsToDuration(totalSeconds: Int((Double(sunriseTimeInterval) - (date.timeIntervalSince1970 )) * extendRate))
                 returner = (5,59,59)
-                returner.hour -= (distanceToSunrise.hour > 5 ? distanceToSunrise.hour+24 : distanceToSunrise.hour)
+                returner.hour -= (distanceToSunrise.hour > 5 ? distanceToSunrise.hour-24 : distanceToSunrise.hour)
                 returner.minute -= distanceToSunrise.minute
                 returner.second -= distanceToSunrise.second
+                print(3)
             }
             return returner
         }
@@ -78,12 +81,12 @@ class WeatherDataModel {
         return returner
     }
     
-    func addTwoTimeTouple (first:(Int,Int,Int),second:(Int,Int,Int))-> (Int,Int,Int){
-        var returner :(Int,Int,Int) = (0,0,0)
-        returner = (first.0 + second.0 > 23 ? first.0 + second.0 - 24 : first.0 + second.0
-            , first.1 + second.1, first.2 + second.2)
-        return returner
-    }
+//    func addTwoTimeTouple (first:(Int,Int,Int),second:(Int,Int,Int))-> (Int,Int,Int){
+//        var returner :(Int,Int,Int) = (0,0,0)
+//        returner = (first.0 + second.0 > 23 ? first.0 + second.0 - 24 : first.0 + second.0
+//            , first.1 + second.1, first.2 + second.2)
+//        return returner
+//    }
     
     func timeIntervalSince1970ToDate(totalSeconds:Int) -> (Date:(year:Int,month:Int,day:Int),Time:(hour:Int,minute:Int,second:Int)){
         var returner : (Date:(year:Int,month:Int,day:Int),Time:(hour:Int,minute:Int,second:Int)) = ((0,0,0),(0,0,0))
